@@ -49,6 +49,7 @@ done
 if [ "$pass_through" -eq 0 ] && ! msrf_shell_owned_by_maestri "$PPID"; then pass_through=1; fi
 [ "$pass_through" -eq 1 ] && exec "$CLAUDE_BIN" "$@"
 
+# shellcheck disable=SC2034  # read by msrf_decide in msrf-lib.sh
 MSRF_TERMINAL="$terminal"
 MSRF_AUTO=0
 [ "$(msrf_process_age_seconds "$PPID")" -lt "$MSRF_AUTO_START_SECONDS" ] && MSRF_AUTO=1

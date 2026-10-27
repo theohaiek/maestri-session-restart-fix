@@ -20,7 +20,7 @@ for rc in "$HOME/.zshrc" "$HOME/.bashrc"; do
     cat "$rc.msrf-tmp" > "$rc" && rm -f "$rc.msrf-tmp"
     echo "OK    Line removed from $rc"
 done
-rm -rf "$MSRF_HOME/bin"
+rm -rf "${MSRF_HOME:?}/bin"
 echo "OK    Removed $MSRF_HOME/bin"
-if [ "${1:-}" = "--remove-data" ]; then rm -rf "$MSRF_HOME"; echo "OK    Removed $MSRF_HOME"; fi
+if [ "${1:-}" = "--remove-data" ]; then rm -rf "${MSRF_HOME:?}"; echo "OK    Removed $MSRF_HOME"; fi
 echo "Uninstalled. Open terminals keep the claude function until they are closed."

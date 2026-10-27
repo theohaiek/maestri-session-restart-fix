@@ -1,5 +1,7 @@
 # shellcheck shell=bash
 # Shared functions for macOS and Linux. Compatible with bash 3.2 (the macOS default).
+# Globals set here are read by the scripts that source this file.
+# shellcheck disable=SC2034
 
 MSRF_NAME="maestri-session-restart-fix"
 MSRF_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
