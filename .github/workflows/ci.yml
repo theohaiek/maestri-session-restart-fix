@@ -1,0 +1,53 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tests on Windows PowerShell 5.1
+        shell: powershell
+        run: powershell -NoProfile -File tests/windows.tests.ps1
+      - name: Tests on PowerShell 7
+        shell: pwsh
+        run: pwsh -NoProfile -File tests/windows.tests.ps1
+      - name: Native helper compiles
+        shell: powershell
+        run: Add-Type -TypeDefinition ([IO.File]::ReadAllText("$PWD\windows\MsrfNative.cs")); [MsrfNative]::ListProcesses().Count
+
+  posix:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tests with the system bash (3.2 on macOS)
+        run: /bin/bash tests/posix.test.sh
+      - name: Shellcheck
+        if: runner.os == 'Linux'
+        run: shellcheck -S warning -x posix/*.sh install.sh uninstall.sh doctor.sh tests/posix.test.sh
+
+  hygiene:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: No CRLF
+        run: |
+          if grep -rIl $'\r' --exclude-dir=.git . ; then echo "CRLF found"; exit 1; fi
+      - name: No private data or attribution trailers
+        run: |
+          fail=0
+          if grep -rIohE '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}' --exclude-dir=.git . | grep -vE '@example\.(com|org|net)$'; then
+            echo "real-looking e-mail address found"; fail=1; fi
+          if grep -rIlE 'BEGIN [A-Z ]*PRIVATE KEY|Co-Authored-By|Generated with \[?Claude' --exclude-dir=.git --exclude-dir=.github .; then
+            echo "private key or attribution trailer found"; fail=1; fi
+          if grep -rIlE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' --exclude-dir=.git --exclude=*.test.sh --exclude=*.tests.ps1 . ; then
+            echo "real session or terminal id found outside the tests"; fail=1; fi
+          exit $fail
+      - name: Python helper compiles
+        run: python3 -m py_compile posix/msrf_settings.py

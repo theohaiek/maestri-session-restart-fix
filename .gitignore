@@ -1,0 +1,8 @@
+# Local test output and OS noise
+*.msrf-backup-*
+*.tmp
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+.claude/settings.local.json
